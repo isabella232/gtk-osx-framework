@@ -1,15 +1,16 @@
 #!/bin/bash
 #
-# Creates a Mac OS X framework for Loudmouth.
+# Creates a Mac OS X framework for Sigc++
 #
 # Copyright (C) 2007, 2008 Imendio AB
+# Copyright (C) 2009 Rob Caelers
 #
 
 source ./framework-helpers.sh
 
 # Do initial setup.
-init Loudmouth "1" "$1" "$2" libloudmouth-1.0.dylib
-copy_single_main_library
+init Sigcpp "1" "$1" "$2" libsigc-2.0.0.dylib
+copy_main_library
 
 # Copy in any libraries we depend on.
 resolve_dependencies
@@ -19,9 +20,13 @@ fix_library_references
 
 # Copy header files.
 copy_headers \
-    include/loudmouth-1.0 loudmouth
-
+    include/sigc++-2.0 .  \
+    lib/sigc++-2.0/include .
+    
 # Copy and update our "fake" pkgconfig files.
-copy_pc_files "loudmouth-1.0.pc"
+copy_pc_files "sigc++-2.0.pc"
+
+# Create the library that will be the main framework library.
+build_framework_library
 
 echo "Done."
