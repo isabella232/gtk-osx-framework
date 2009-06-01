@@ -82,24 +82,24 @@ do_abort()
 
 init()
 {
-    if [ x"$2" = x -o x"$3" = x ]; then
+    if [ x"$2" = x -o x"$3" = x -o x"$4" = x ]; then
 	print_help
 	do_exit 1
     fi
 
-    if [ ! -d "$3" ]; then
-	do_exit 1 "The directory $3 does not exist"
+    if [ ! -d "$4" ]; then
+	do_exit 1 "The directory $4 does not exist"
     fi
 
-    if [ ! -x "$3" ]; then
-	do_exit 1 "The framework in $3 is not accessible"
+    if [ ! -x "$4" ]; then
+	do_exit 1 "The framework in $4 is not accessible"
     fi
 
     # Drop any trailing slash.
-    old_prefix=`dirname "$3"`/`basename "$3"`
+    old_prefix=`dirname "$4"`/`basename "$4"`
     old_prefix=`echo $old_prefix | sed -e "s@//@/@"`
 
-    main_library="$old_prefix/lib/$4"
+    main_library="$old_prefix/lib/$5"
 
     if [ ! -x "$main_library" ]; then
 	do_exit 1 "Required library $main_library does not exist."
@@ -107,8 +107,11 @@ init()
 
     framework_name="$1"
     version="$2"
+    target_directory="$3"
 
-    framework="`pwd`/$framework_name.framework"
+    mkdir -p $target_directory
+    
+    framework="$target_directory/$framework_name.framework"
     new_prefix="$framework/Versions/$version/Libraries"
 
     if [ -x $framework ]; then
@@ -158,7 +161,7 @@ symlink_framework_library()
     # form "libfoo.dylib". The pkg-config file points to this
     # directory and library.
     mkdir -p "$framework"/Versions/$version/Resources/dev/lib
-    ln -s "$framework"/$framework_name "$framework"/Versions/$version/Resources/dev/lib/lib$framework_name.dylib || do_exit 1
+    ln -s ../../../../../$framework_name "$framework"/Versions/$version/Resources/dev/lib/lib$framework_name.dylib || do_exit 1
 }
 
 copy_single_main_library()
@@ -181,8 +184,8 @@ resolve_dependencies()
 
     while $files_left; do
 	libs0="$framework/$framework_name"
-	libs1=`find $framework_name.framework/Versions/$version/Resources/lib -name "*.dylib" -o -name "*.so" 2>/dev/null`
-	libs2=`find $framework_name.framework/Versions/$version/Libraries -name "*.dylib" -o -name "*.so" 2>/dev/null`
+	libs1=`find $framework/Versions/$version/Resources/lib -name "*.dylib" -o -name "*.so" 2>/dev/null`
+	libs2=`find $framework/Versions/$version/Libraries -name "*.dylib" -o -name "*.so" 2>/dev/null`
 	deplibs=`otool -L $libs0 $libs1 $libs2 2>/dev/null | fgrep compatibility | cut -d\( -f1 | grep "$old_prefix"/lib | grep -v "$main_library" | sort | uniq`
 
 	# Copy library and correct ID
@@ -223,6 +226,7 @@ copy_pc_files()
     for pc in $1; do
     cat "$old_prefix"/lib/pkgconfig/$pc | sed \
         -e "s/\(^prefix=\).*/\1$escaped_framework\/Versions\/$version\/Resources/" \
+        -e "s/\(^libdir=\).*/\1$escaped_framework\/Versions\/$version\/Resources\/dev\/lib/" \
         -e "s/\(^Requires.private:\).*/\1/" \
         -e "s/\(^Libs:\).*/\1 -L$escaped_framework\/Versions\/$version\/Resources\/dev\/lib -l$framework_name/" \
         -e "s/\(^Cflags:\).*/\1 -I$escaped_framework\/Versions\/$version\/Headers/" > "$framework"/Versions/$version/Resources/dev/lib/pkgconfig/$pc
@@ -236,7 +240,8 @@ build_framework_library()
     pushd . >/dev/null
     cd src
 
-    MACOSX_DEPLOYMENT_TARGET=10.4 make version=$version $framework_name >/dev/null || do_exit 1
+    echo MACOSX_DEPLOYMENT_TARGET=10.4 ROOT=$target_directory make version=$version $framework_name
+    MACOSX_DEPLOYMENT_TARGET=10.4 ROOT=$target_directory make version=$version $framework_name || do_exit 1
     mv $framework_name "$framework"/Versions/$version/$framework_name || do_exit 1
 
     popd >/dev/null

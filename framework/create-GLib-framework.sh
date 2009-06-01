@@ -89,7 +89,7 @@ copy_pkgconfig()
 }
 
 # Do initial setup.
-init GLib "2" "$*" libglib-2.0.0.dylib
+init GLib "2" "$1" "$2" libglib-2.0.0.dylib
 copy_main_library
 
 # Copy in libraries manually since nothing links to them so they are
@@ -114,6 +114,7 @@ copy_headers \
     include/glib-2.0 gmodule.h \
     include/glib-2.0 gobject \
     include/glib-2.0 gio \
+    include/gio-unix-2.0/ gio/ \
     include libintl.h
 
 # Copy  pkg-config.
@@ -126,7 +127,8 @@ copy_pc_files "gio-2.0.pc gio-unix-2.0.pc glib-2.0.pc gmodule-2.0.pc gmodule-exp
 build_framework_library
 
 # Special-case libintl so that dependencies don't pick it up.
-ln -s "$framework"/GLib "$framework"/Versions/$version/Resources/dev/lib/libintl.8.dylib || do_exit 1
+ln -s ../../../../../GLib "$framework"/Versions/$version/Resources/dev/lib/libintl.8.dylib || do_exit 1
+ln -s ../../../../../GLib "$framework"/Versions/$version/Resources/dev/lib/libintl.dylib || do_exit 1
 
 # Copy glib executables.
 copy_dev_executables glib-genmarshal glib-gettextize glib-mkenums

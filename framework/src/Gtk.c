@@ -2,6 +2,7 @@
  * Gtk.c - Framework initialization code.
  *
  * Copyright (C) 2007, 2008 Imendio AB
+ * Copyright (C) 2009 Rob Caelers
  */
 
 #include <stdio.h>
@@ -9,11 +10,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <mach-o/dyld.h>
+#include <mach-o/ldsyms.h>
 #include <Carbon/Carbon.h>
 #include <CoreFoundation/CoreFoundation.h>
 
 /* Relative location of the framework in an application bundle. */
 #define FRAMEWORK_OFFSET                        "./Contents/Frameworks/Gtk.framework"
+#define GTK_FRAMEWORK                           "/Gtk.framework/"
 
 #define RELATIVE_PANGO_RC_FILE			"/Resources/etc/pango/pangorc"
 #define RELATIVE_GTK_RC_FILE			"/Resources/etc/gtk-2.0/gtkrc"
@@ -81,6 +84,39 @@ is_running_from_app_bundle (void)
   return 0;
 }
 
+static char *
+get_gtk_framework_path (void)
+{
+  const char *imagename = NULL;
+  char *imagepath = NULL;
+  int cnt = _dyld_image_count();
+  int i = 0;
+
+  for (i = 1; i < cnt; i++)
+    {
+      if (_dyld_get_image_header(i) == &_mh_dylib_header)
+        {
+          imagename = _dyld_get_image_name(i);
+          break;
+        }
+    }
+ 
+  if (imagename != NULL)
+    {
+      char *ptr = strstr(imagename, GTK_FRAMEWORK);
+      if (ptr != NULL)
+        {
+          int len = ptr - imagename + strlen(GTK_FRAMEWORK);
+
+          imagepath = malloc(len + 1);
+          strncpy(imagepath, imagename, len);
+          imagepath[len] = '\0';
+        }
+    }
+
+  return imagepath;
+}
+
 static OSErr
 handle_quit_cb (const AppleEvent *inAppleEvent,
                 AppleEvent       *outAppleEvent,
@@ -104,32 +140,37 @@ handle_quit_cb (const AppleEvent *inAppleEvent,
 initializer (int argc, char **argv, char **envp)
 {
   static int initialized = 0;
-
+  
   if (initialized)
     return;
   initialized = 1;
 
-  /* Figure out correct bundle prefix. */
-  if (!is_running_from_app_bundle ())
+  bundle_prefix = get_gtk_framework_path();
+
+  if (bundle_prefix == NULL)
     {
-      bundle_prefix = strdup ("/Library/Frameworks/Gtk.framework");
-    }
-  else
-    {
-      char executable_path[PATH_MAX];
-      CFURLRef url;
+      /* Figure out correct bundle prefix. */
+      if (!is_running_from_app_bundle ())
+        {
+          bundle_prefix = strdup ("/Library/Frameworks/Gtk.framework");
+        }
+      else
+        {
+          char executable_path[PATH_MAX];
+          CFURLRef url;
 
-      url = CFBundleCopyBundleURL (CFBundleGetMainBundle ());
-      if (!CFURLGetFileSystemRepresentation (url, true, (UInt8 *)executable_path, PATH_MAX))
-        assert(false);
-      CFRelease (url);
+          url = CFBundleCopyBundleURL (CFBundleGetMainBundle ());
+          if (!CFURLGetFileSystemRepresentation (url, true, (UInt8 *)executable_path, PATH_MAX))
+            assert(false);
+          CFRelease (url);
 
-      bundle_prefix = malloc (strlen (executable_path) + 1 + strlen (FRAMEWORK_OFFSET) + 1);
-      strcpy (bundle_prefix, executable_path);
-      strcpy (bundle_prefix + strlen (executable_path), "/");
-      strcpy (bundle_prefix + strlen (executable_path) + 1, FRAMEWORK_OFFSET);
+          bundle_prefix = malloc (strlen (executable_path) + 1 + strlen (FRAMEWORK_OFFSET) + 1);
+          strcpy (bundle_prefix, executable_path);
+          strcpy (bundle_prefix + strlen (executable_path), "/");
+          strcpy (bundle_prefix + strlen (executable_path) + 1, FRAMEWORK_OFFSET);
 
-      free (executable_path);
+          free (executable_path);
+        }
     }
 
   /* NOTE: leave the setting of the environment variables in this order,
