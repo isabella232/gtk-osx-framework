@@ -21,11 +21,11 @@ Steps to create a working SDK
 1. Bootstrap and build the dependencies. You need a recent version of
    jhbuild and latest jhbuild setup from:
 
-   http://live.gnome.org/GTK%2B/OSX
+   https://apps.sourceforge.net/trac/gtk-osx/wiki/Build
 
    You also need the file:
 
-   http://github.com/rhult/gtk-osx-build/raw/master/jhbuildrc-gtk-osx-cfw-10.4
+   http://github.com/jralls/gtk-osx-build/raw/master/jhbuildrc-gtk-osx-cfw-10.4
 
    Symlink or copy it into:
 
