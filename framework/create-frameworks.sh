@@ -19,8 +19,8 @@
 # Use the right configuration for jhbuild.
 export JHB=cfw-10.4
 
-all_modules="GLib Cairo Gtk Sigcpp GNet Glibmm Cairomm Gtkmm Libglade Loudmouth WebKitGtk"
-
+all_modules="GLib Cairo Gtk Sigcpp GNet Libglade Loudmouth WebKitGtk"
+#Temporarily removed until perl path probem resolved:  Glibmm Cairomm Gtkmm
 PREFIX=`jhbuild getenv JHBUILD_PREFIX`
 case "$PREFIX" in
     /*)
@@ -192,7 +192,7 @@ create_framework Cairo pixman cairo
 use_framework Cairo
 
 # gnome-icon-theme requires gettext, that's why we build it here.
-create_framework Gtk gnome-icon-theme atk pango gtk+ gtk-engines ige-mac-integration gtk-quartz-engine
+create_framework Gtk gnome-icon-theme atk freetype fontconfig pango gtk+ gtk-engines ige-mac-integration gtk-quartz-engine
 use_framework Gtk
 
 create_framework GNet gnet 
@@ -201,14 +201,14 @@ use_framework GNet
 create_framework Sigcpp libsigc++2
 use_framework Sigcpp
 
-create_framework Glibmm glibmm
-use_framework Glibmm
+#create_framework Glibmm glibmm
+#use_framework Glibmm
 
-create_framework Cairomm cairomm
-use_framework Cairomm
+#create_framework Cairomm cairomm
+#use_framework Cairomm
 
-create_framework Gtkmm pangomm cairomm gtkmm 
-use_framework Gtkmm
+#create_framework Gtkmm pangomm cairomm gtkmm 
+#use_framework Gtkmm
 
 exit 0
 
