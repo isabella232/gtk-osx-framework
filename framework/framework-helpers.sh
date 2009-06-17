@@ -87,19 +87,19 @@ init()
 	do_exit 1
     fi
 
-    if [ ! -d "$3" ]; then
-	do_exit 1 "The directory $3 does not exist"
+    if [ ! -d "$4" ]; then
+	do_exit 1 "The directory $4 does not exist"
     fi
 
-    if [ ! -x "$3" ]; then
-	do_exit 1 "The framework in $3 is not accessible"
+    if [ ! -x "$4" ]; then
+	do_exit 1 "The framework in $4 is not accessible"
     fi
 
     # Drop any trailing slash.
-    old_prefix=`dirname "$3"`/`basename "$3"`
+    old_prefix=`dirname "$4"`/`basename "$4"`
     old_prefix=`echo $old_prefix | sed -e "s@//@/@"`
 
-    main_library="$old_prefix/lib/$4"
+    main_library="$old_prefix/lib/$3" 										### hacked by easyb ###
 
     if [ ! -x "$main_library" ]; then
 	do_exit 1 "Required library $main_library does not exist."
@@ -108,7 +108,7 @@ init()
     framework_name="$1"
     version="$2"
 
-    framework="`pwd`/$framework_name.framework"
+    framework="`pwd`/$5/$framework_name.framework" 				### hacked by easyb ###
     new_prefix="$framework/Versions/$version/Libraries"
 
     if [ -x $framework ]; then
@@ -178,11 +178,13 @@ resolve_dependencies()
 
     files_left=true
     nfiles=0
-
+		
+		### hacked by easyb
+		
     while $files_left; do
 	libs0="$framework/$framework_name"
-	libs1=`find $framework_name.framework/Versions/$version/Resources/lib -name "*.dylib" -o -name "*.so" 2>/dev/null`
-	libs2=`find $framework_name.framework/Versions/$version/Libraries -name "*.dylib" -o -name "*.so" 2>/dev/null`
+	libs1=`find $framework/Versions/$version/Resources/lib -name "*.dylib" -o -name "*.so" 2>/dev/null`
+	libs2=`find $framework/Versions/$version/Libraries -name "*.dylib" -o -name "*.so" 2>/dev/null`
 	deplibs=`otool -L $libs0 $libs1 $libs2 2>/dev/null | fgrep compatibility | cut -d\( -f1 | grep "$old_prefix"/lib | grep -v "$main_library" | sort | uniq`
 
 	# Copy library and correct ID
@@ -220,9 +222,9 @@ copy_pc_files()
 
     mkdir -p "$framework"/Versions/$version/Resources/dev/lib/pkgconfig
 
-    for pc in $1; do
+    for pc in $1; do   																												# easyb: changed prefix
     cat "$old_prefix"/lib/pkgconfig/$pc | sed \
-        -e "s/\(^prefix=\).*/\1$escaped_framework\/Versions\/$version\/Resources/" \
+        -e "s/\(^prefix=\).*/\1$escaped_framework\/Versions\/$version\/Resources\/dev/" \
         -e "s/\(^Requires.private:\).*/\1/" \
         -e "s/\(^Libs:\).*/\1 -L$escaped_framework\/Versions\/$version\/Resources\/dev\/lib -l$framework_name/" \
         -e "s/\(^Cflags:\).*/\1 -I$escaped_framework\/Versions\/$version\/Headers/" > "$framework"/Versions/$version/Resources/dev/lib/pkgconfig/$pc
@@ -236,7 +238,7 @@ build_framework_library()
     pushd . >/dev/null
     cd src
 
-    MACOSX_DEPLOYMENT_TARGET=10.4 make version=$version $framework_name >/dev/null || do_exit 1
+    MACOSX_DEPLOYMENT_TARGET=10.4 make version=$version framework=$framework $framework_name  || do_exit 1
     mv $framework_name "$framework"/Versions/$version/$framework_name || do_exit 1
 
     popd >/dev/null
