@@ -17,9 +17,11 @@
 #
 
 # Use the right configuration for jhbuild.
-export JHB=cfw-10.4
+export JHB=cfw-10.4u
 
-all_modules="GLib Cairo Gtk Libglade Loudmouth WebKitGtk"
+build_dir=build
+
+all_modules="GLib Cairo Gtk Libglade" #WebKitGtk Loudmouth GLibmm Cairomm Gtkmm Libglademm
 
 PREFIX=`jhbuild getenv JHBUILD_PREFIX`
 case "$PREFIX" in
@@ -35,13 +37,14 @@ esac
 
 print_usage()
 {
-    echo "Usage: `basename $0` [-fnlh] [FRAMEWORK...]"
+    echo "Usage: `basename $0` [-fnlhu] [FRAMEWORK...]"
     echo "Options:"
     echo "  -f        - Do not rebuild, just recreate the frameworks"
     echo "  -n        - Do not update modules (network-less mode)"
     echo "  -l        - Do not run 'make clean' before building"
     echo "  -s        - Start a shell for manual building for each framework"
     echo "  -h        - Display this help text"
+    echo "  -u        - Don't uninstall" # hacked by easyb...
     echo "            - FRAMEWORK... is an optional list of frameworks to create"
     echo "              Valid framework names are: $all_modules"
 }
@@ -86,25 +89,28 @@ create_framework()
         if [ "$*" == "WebKit" ]; then
             clean=
         fi
-
+        
         if [ $rebuild == yes ]; then
             # Uninstall (from any previous attempts that failed) so
             # the following modules don't link against the dylibs, but
             # the frameworks instead.
-            uninstall_modules $*
+          #uninstall_modules $*
 
             rm "$PREFIX"/lib/*.la 2>/dev/null
-            jhbuild buildone $update $clean $* || exit 1
-        else
-            install_modules $*
+            jhbuild build $update $clean $* || exit 1         # easyb: switched from buildone to build to use metamodules,
+                                                              #        can't use original modulesets anymore though
+        #else
+        #    if [ $inst == yes ]; then
+        #     install_modules $*              # hacked by easyb...
+        #    fi
         fi
 
         clean=$clean_save
 
-        rm -rf $framework.framework
+        rm -rf $build_dir/$framework.framework
         #rm -rf $framework-runtime.framework
 
-        ./create-$framework-framework.sh $PREFIX || exit 1
+        ./create-$framework-framework.sh $PREFIX $build_dir || exit 1             # hacked by easyb...
 
         #cp -R $framework.framework $framework-runtime.framework || exit 1
         # FIXME: This only removes the symlinks.
@@ -112,7 +118,7 @@ create_framework()
         #rm -rf $framework-runtime.framework/Resources/dev
         #strip ...
 
-        if [ $rebuild == yes ]; then
+        if [ $rebuild == yes ] && [ $uinst == yes ]; then
             # Uninstall so the following modules don't link against the
             # dylibs, but the frameworks instead.
             uninstall_modules $*
@@ -125,9 +131,9 @@ use_framework()
     framework=$1
 
     if [ "x$JHB_PREPEND_FRAMEWORKS" == x ]; then
-        export JHB_PREPEND_FRAMEWORKS=`pwd`/$framework.framework
+        export JHB_PREPEND_FRAMEWORKS=`pwd`/$build_dir/$framework.framework
     else
-        export JHB_PREPEND_FRAMEWORKS="$JHB_PREPEND_FRAMEWORKS:`pwd`/$framework.framework"
+        export JHB_PREPEND_FRAMEWORKS="$JHB_PREPEND_FRAMEWORKS:`pwd`/$build_dir/$framework.framework"
     fi
 }
 
@@ -135,7 +141,9 @@ shell=
 rebuild=yes
 update=
 clean=-c
-while getopts "fnlsh" o; do
+inst=yes
+uinst=yes
+while getopts "fnlshua" o; do
     case "$o" in
         f)
             rebuild=no
@@ -149,6 +157,9 @@ while getopts "fnlsh" o; do
         s)
             shell=yes
             ;;
+        u)
+            uinst=no
+            ;;
         h)
             print_usage
             exit 0
@@ -157,6 +168,7 @@ while getopts "fnlsh" o; do
             print_usage
             exit 1
             ;;
+
     esac
 done
 shift $(($OPTIND - 1))
@@ -181,25 +193,42 @@ else
     modules=$all_modules
 fi
 
-# We build gettext here instead of in bootstrap because it's part of
-# the GLib framework.
-create_framework GLib gettext-fw glib
+
+  
+mkdir -p $build_dir
+  
+
+create_framework GLib glib-universal
 use_framework GLib
 
-create_framework Cairo pixman cairo
+create_framework Cairo cairo
 use_framework Cairo
 
-# gnome-icon-theme requires gettext, that's why we build it here.
-create_framework Gtk gnome-icon-theme atk pango gtk+ gtk-engines ige-mac-integration
+create_framework Gtk gtk-universal
 use_framework Gtk
-
-exit 0
 
 create_framework Libglade libglade
 use_framework Libglade
 
-create_framework Loudmouth loudmouth
-use_framework Loudmouth
+exit 0
 
-create_framework WebKitGtk WebKit
-use_framework WebKitGtk
+#create_framework Loudmouth loudmouth ##FIXME##
+#use_framework Loudmouth
+
+#create_framework WebKitGtk WebKit ##FIXME##
+#use_framework WebKitGtk
+
+create_framework GLibmm doxygen libsigc++2 glibmm
+use_framework GLibmm
+
+create_framework Cairomm cairomm
+use_framework Cairomm 
+
+create_framework Gtkmm pangomm gtkmm 
+use_framework Gtkmm
+
+create_framework Libglademm libglademm
+use_framework Libglademm
+
+
+

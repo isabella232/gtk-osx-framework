@@ -89,7 +89,7 @@ copy_pkgconfig()
 }
 
 # Do initial setup.
-init GLib "2" "$*" libglib-2.0.0.dylib
+init GLib "2" libglib-2.0.0.dylib "$@"			### hacked by easyb ###
 copy_main_library
 
 # Copy in libraries manually since nothing links to them so they are
@@ -105,7 +105,7 @@ resolve_dependencies
 # "Relink" library dependencies.
 fix_library_references
 
-# Copy header files.
+# Copy header files.  														### hacked by easyb ###
 copy_headers \
     include/glib-2.0 glib \
     include/glib-2.0 glib.h \
@@ -114,7 +114,11 @@ copy_headers \
     include/glib-2.0 gmodule.h \
     include/glib-2.0 gobject \
     include/glib-2.0 gio \
-    include libintl.h
+    include libintl.h \
+    include/gio-unix-2.0 gio/gdesktopappinfo.h \
+    include/gio-unix-2.0 gio/gunixinputstream.h \
+    include/gio-unix-2.0 gio/gunixmounts.h \
+    include/gio-unix-2.0 gio/gunixoutputstream.h \
 
 # Copy  pkg-config.
 copy_pkgconfig

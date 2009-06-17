@@ -8,10 +8,10 @@
 source ./framework-helpers.sh
 
 # Do initial setup.
-init Gtk "2" "$*" libgtk-quartz-2.0.0.dylib
+init Gtk "2" libgtk-quartz-2.0.0.dylib "$@"			### hacked by easyb ###
 copy_main_library
 
-# Copy header files.
+# Copy header files.  														### hacked by easyb ###
 copy_headers \
     include/pango-1.0 pango \
     include/atk-1.0 atk \
@@ -19,7 +19,12 @@ copy_headers \
     lib/gtk-2.0/include gdkconfig.h \
     include/gtk-2.0 gdk-pixbuf \
     include/gtk-2.0 gtk \
-    include/igemacintegration .
+    include/gtk-unix-print-2.0 gtk/gtkpagesetupunixdialog.h \
+    include/gtk-unix-print-2.0 gtk/gtkprinter.h \
+    include/gtk-unix-print-2.0 gtk/gtkprintjob.h	 \
+    include/gtk-unix-print-2.0 gtk/gtkprintunixdialog.h \
+    include/gtk-unix-print-2.0 gtk/gtkunixprint.h \
+    include/igemacintegration .    
 
 # Set up pango.
 echo "Setting up Pango modules..."
