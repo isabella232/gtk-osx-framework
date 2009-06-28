@@ -195,6 +195,8 @@ use_framework Cairo
 create_framework Gtk gnome-icon-theme atk freetype fontconfig pango gtk+ gtk-engines ige-mac-integration gtk-quartz-engine
 use_framework Gtk
 
+exit
+
 create_framework GNet gnet 
 use_framework GNet
 
