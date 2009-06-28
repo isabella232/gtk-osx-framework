@@ -1,5 +1,5 @@
 gtk-icon-theme-name = "Gnome"
-gtk-theme-name = "Quartz"
+gtk-theme-name = "Clearlooks"
 gtk-key-theme-name = "Mac"
 gtk-enable-mnemonics = 0
 gtk-button-images = 0

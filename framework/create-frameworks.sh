@@ -19,8 +19,8 @@
 # Use the right configuration for jhbuild.
 export JHB=cfw-10.4
 
-all_modules="GLib Cairo Gtk Sigcpp GNet Libglade Loudmouth WebKitGtk"
-#Temporarily removed until perl path probem resolved:  Glibmm Cairomm Gtkmm
+all_modules="GLib Cairo Gtk Libglade Loudmouth WebKitGtk"
+
 PREFIX=`jhbuild getenv JHBUILD_PREFIX`
 case "$PREFIX" in
     /*)
@@ -32,8 +32,6 @@ case "$PREFIX" in
         exit 1
         ;;
 esac
-
-TARGETDIR=`pwd`/Frameworks
 
 print_usage()
 {
@@ -103,15 +101,15 @@ create_framework()
 
         clean=$clean_save
 
-        rm -rf $TARGETDIR/$framework.framework
-        #rm -rf $TARGETDIR/$framework-runtime.framework
+        rm -rf $framework.framework
+        #rm -rf $framework-runtime.framework
 
-        ./create-$framework-framework.sh $TARGETDIR $PREFIX || exit 1
+        ./create-$framework-framework.sh $PREFIX || exit 1
 
-        #cp -R $TARGETDIR/$framework.framework $TARGETDIR/$framework-runtime.framework || exit 1
+        #cp -R $framework.framework $framework-runtime.framework || exit 1
         # FIXME: This only removes the symlinks.
-        #rm -rf $TARGETDIR/$framework-runtime.framework/Headers
-        #rm -rf $TARGETDIR/$framework-runtime.framework/Resources/dev
+        #rm -rf $framework-runtime.framework/Headers
+        #rm -rf $framework-runtime.framework/Resources/dev
         #strip ...
 
         if [ $rebuild == yes ]; then
@@ -127,9 +125,9 @@ use_framework()
     framework=$1
 
     if [ "x$JHB_PREPEND_FRAMEWORKS" == x ]; then
-        export JHB_PREPEND_FRAMEWORKS=$TARGETDIR/$framework.framework
+        export JHB_PREPEND_FRAMEWORKS=`pwd`/$framework.framework
     else
-        export JHB_PREPEND_FRAMEWORKS="$JHB_PREPEND_FRAMEWORKS:$TARGETDIR/$framework.framework"
+        export JHB_PREPEND_FRAMEWORKS="$JHB_PREPEND_FRAMEWORKS:`pwd`/$framework.framework"
     fi
 }
 
@@ -192,25 +190,8 @@ create_framework Cairo pixman cairo
 use_framework Cairo
 
 # gnome-icon-theme requires gettext, that's why we build it here.
-create_framework Gtk gnome-icon-theme atk freetype fontconfig pango gtk+ gtk-engines ige-mac-integration gtk-quartz-engine
+create_framework Gtk gnome-icon-theme atk pango gtk+ gtk-engines ige-mac-integration
 use_framework Gtk
-
-exit
-
-create_framework GNet gnet 
-use_framework GNet
-
-create_framework Sigcpp libsigc++2
-use_framework Sigcpp
-
-#create_framework Glibmm glibmm
-#use_framework Glibmm
-
-#create_framework Cairomm cairomm
-#use_framework Cairomm
-
-#create_framework Gtkmm pangomm cairomm gtkmm 
-#use_framework Gtkmm
 
 exit 0
 
