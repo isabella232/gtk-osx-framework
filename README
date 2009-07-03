@@ -1,12 +1,6 @@
 GTK+ OS X SDK
 =============
 
-Note Well: There are 3 branches to this repository. Universal has
-some changes supporting Universal Binaries; Master started off
-mirroring rcaeler's gtkmm additions, but those have been reverted
-back out, and they are now mirrored in the gtkmm-frameworks branch. If
-you're going to work on something, be sure to pick the right one! -- John
-
 Copyright (C) 2007, 2008 Imendio AB
 
 The files that are found in this repository can be used to create a
@@ -27,11 +21,11 @@ Steps to create a working SDK
 1. Bootstrap and build the dependencies. You need a recent version of
    jhbuild and latest jhbuild setup from:
 
-   http://live.gnome.org/GTK%2B/OSX
+   http://gtk-osx.sourceforge.net/
 
    You also need the file:
 
-   http://github.com/rhult/gtk-osx-build/raw/master/jhbuildrc-gtk-osx-cfw-10.4
+   http://github.com/jralls/gtk-osx-build/raw/master/jhbuildrc-gtk-osx-cfw-10.4
 
    Symlink or copy it into:
 
@@ -96,7 +90,7 @@ Known issues
 
 * This is all still in the beta stage.
 
-* The binaries are not universal, but Intel only. Universal builds is
+* The binaries are not universal. Universal builds is
   not a high priority currently, so don't except it soon.
 
 * Translations are not yet included.
