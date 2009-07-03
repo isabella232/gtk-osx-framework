@@ -1,8 +1,5 @@
-GLib
-Gtk
-Cairo
-Libglade
-Loudmouth
+Frameworks
 *.mode1v3
 *.pbxuser
 *.mpkg
+*.dmg
