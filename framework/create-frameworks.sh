@@ -198,13 +198,13 @@ fi
 mkdir -p $build_dir
   
 
-create_framework GLib glib-universal
+create_framework GLib meta-glib-universal
 use_framework GLib
 
 create_framework Cairo cairo
 use_framework Cairo
 
-create_framework Gtk gtk-universal
+create_framework Gtk meta-gtk-universal
 use_framework Gtk
 
 create_framework Libglade libglade
