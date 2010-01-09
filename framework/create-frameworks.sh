@@ -21,11 +21,12 @@ export JHB=cfw-10.4
 
 all_modules="GLib Cairo Gtk Sigcpp GNet Libglade Loudmouth WebKitGtk"
 #Temporarily removed until perl path probem resolved:  Glibmm Cairomm Gtkmm
-PREFIX=`jhbuild getenv JHBUILD_PREFIX`
+PREFIX=`jhbuild gtk-osx-getenv JHBUILD_PREFIX`
 case "$PREFIX" in
     /*)
         ;;
     *)
+	echo $PREFIX
         echo "No prefix setup, make sure you have a recent jhbuildrc file from"
         echo " http://developer.imendio.com/projects/gtk-macosx/"
         echo "and a framework creation setup (\".jhbuildrc-$JHB\" file)."
