@@ -28,7 +28,7 @@ case "$PREFIX" in
     *)
 	echo $PREFIX
         echo "No prefix setup, make sure you have a recent jhbuildrc file from"
-        echo " http://developer.imendio.com/projects/gtk-macosx/"
+        echo " http://github.com/jralls/gtk-osx-build/"
         echo "and a framework creation setup (\".jhbuildrc-$JHB\" file)."
         exit 1
         ;;
@@ -97,7 +97,7 @@ create_framework()
             uninstall_modules $*
 
             rm "$PREFIX"/lib/*.la 2>/dev/null
-            jhbuild buildone $update $clean $* || exit 1
+            jhbuild buildone --force $update $clean $* || exit 1
         else
             install_modules $*
         fi
