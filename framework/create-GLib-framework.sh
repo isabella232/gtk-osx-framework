@@ -11,8 +11,8 @@ copy_gettext_libraries()
 {
     echo "Copying gettext libraries..."
 
-    src=libgettextsrc-0.16.dylib
-    lib=libgettextlib-0.16.dylib
+    src=libgettextsrc-0.17.dylib
+    lib=libgettextlib-0.17.dylib
 
     from="$old_prefix"/lib
     to="$framework"/Resources/dev/lib
