@@ -2,7 +2,8 @@
 # Copyright (C) 2007, 2008 Imendio AB
 #
 
-CFLAGS = -Wall -gstabs+3 -flat_namespace -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk
+#CFLAGS = -Wall -gstabs+3 -flat_namespace -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk
+CFLAGS = -Wall -gstabs+3 -mmacosx-version-min=10.4
 
 PWD = $(shell pwd)
 
