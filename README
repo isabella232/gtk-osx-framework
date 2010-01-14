@@ -1,6 +1,12 @@
 GTK+ OS X SDK
 =============
 
+Note Well: There are 3 branches to this repository. Universal has
+some changes supporting Universal Binaries; Master started off
+mirroring rcaeler's gtkmm additions, but those have been reverted
+back out, and they are now mirrored in the gtkmm-frameworks branch. If
+you're going to work on something, be sure to pick the right one! -- John
+
 Copyright (C) 2007, 2008 Imendio AB
 
 The files that are found in this repository can be used to create a

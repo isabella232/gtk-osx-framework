@@ -8,7 +8,7 @@
 source ./framework-helpers.sh
 
 # Do initial setup.
-init Gtk "2" "$1" "$2" libgtk-quartz-2.0.0.dylib
+init Gtk "2" "$*" libgtk-quartz-2.0.0.dylib
 copy_main_library
 
 # Copy header files.
@@ -19,7 +19,6 @@ copy_headers \
     lib/gtk-2.0/include gdkconfig.h \
     include/gtk-2.0 gdk-pixbuf \
     include/gtk-2.0 gtk \
-    include/gtk-unix-print-2.0/ gtk/ \
     include/igemacintegration .
 
 # Set up pango.
@@ -47,7 +46,6 @@ sed -e "s@$old_prefix/lib@$framework/Versions/$version/Resources/lib@" < "$old_p
 
 # Copy modules.
 cp "$old_prefix"/lib/gtk-2.0/2.10.0/engines/libclearlooks.so "$framework"/Resources/lib/gtk-2.0/2.10.0/engines
-cp "$old_prefix"/lib/gtk-2.0/2.10.0/engines/libquartz.so "$framework"/Resources/lib/gtk-2.0/2.10.0/engines
 cp "$old_prefix"/lib/gtk-2.0/2.10.0/immodules/*so "$framework"/Resources/lib/gtk-2.0/2.10.0/immodules
 cp "$old_prefix"/lib/gtk-2.0/2.10.0/loaders/*so "$framework"/Resources/lib/gtk-2.0/2.10.0/loaders
 cp "$old_prefix"/lib/gtk-2.0/2.10.0/printbackends/*so "$framework"/Resources/lib/gtk-2.0/2.10.0/printbackends
@@ -68,8 +66,8 @@ install_name_tool -id "$newid" "$newid"
 files_left=true
 nfiles=0
 
-libs1=`find $framework/Versions/$version/Resources/lib -name "*.dylib" -o -name "*.so" 2>/dev/null`
-libs2=`find $framework/Versions/$version/Libraries -name "*.dylib" -o -name "*.so" 2>/dev/null`
+libs1=`find $framework_name.framework/Versions/$version/Resources/lib -name "*.dylib" -o -name "*.so" 2>/dev/null`
+libs2=`find $framework_name.framework/Versions/$version/Libraries -name "*.dylib" -o -name "*.so" 2>/dev/null`
 for lib in $libs1 $libs2; do
     match=`otool -L "$lib" 2>/dev/null | fgrep compatibility | cut -d\( -f1 | grep "$old_prefix"/lib | grep libgdk_pixbuf-2.0.0`
     if [ "x$match" != x ]; then
@@ -119,7 +117,6 @@ if [ x$SKIP_THEMES = x ]; then
     #"$old_prefix"/bin/gtk-update-icon-cache -f "$framework"/Resources/share/icons/Tango 2>/dev/null
 
     cp -R "$old_prefix"/share/themes/Clearlooks "$framework"/Resources/share/themes
-    cp -R "$old_prefix"/share/themes/Quartz "$framework"/Resources/share/themes
 else
     echo "Skipping theme data ..."
 fi
